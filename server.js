@@ -31,9 +31,9 @@ app.use('/user', userRouter)
 app.use('/zules', zulesRouter)
 app.use('/zules', fetchZuleRouter)
 
-app.use(function (err, req, res) {
-    console.log(err);
-    return res.json(err)
-});
+// app.use(function (err, req, res) {
+//     console.log(err);
+//     return res.json(err)
+// });
 
 app.listen(process.env.PORT, console.log(`SERVER IS RUNNING ON PORT ${process.env.PORT}`))
