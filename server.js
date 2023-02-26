@@ -33,7 +33,7 @@ app.use('/api/zules', fetchZuleRouter)
 
 app.use(function (err, req, res) {
     console.log(err);
-    return res.send(err)
+    return res.json(err)
 });
 
 app.listen(process.env.PORT, console.log(`SERVER IS RUNNING ON PORT ${process.env.PORT}`))
