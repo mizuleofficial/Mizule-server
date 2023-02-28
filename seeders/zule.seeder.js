@@ -2,4 +2,9 @@ const zuleSeeds = require('./seeds/zule.seed')
 
 const { Zule } = require('../database/database')
 
-Zule.bulkCreate(zuleSeeds).then((res) => console.log(res)).catch(err => console.log(err))
+db.Zule.sync({ force: true }).then(async () => {
+    console.log('ZULE MODEL CREATED')
+    await db.Zule.bulkCreate(zuleSeeds)
+        .then((res) => console.log(res))
+        .catch(err => console.log(err))
+}).catch((err) => console.log('ERROR ' + err))

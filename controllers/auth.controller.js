@@ -7,9 +7,10 @@ const { transporter } = require('../utils/nodemailer.util')
 
 exports.signUp = async (req, res) => {
     try {
-        const { email, password } = req.body;
+        const { email, password, type } = req.body;
+        console.log("🚀 ~ file: auth.controller.js:11 ~ exports.signUp= ~ email, password:", email, password)
 
-        let user = await User.findOne({ email, raw: true })
+        let user = await User.findOne({ where: { email }, raw: true })
 
         if (user) return res.status(500).json({
             error: 'User already exists'
@@ -21,10 +22,10 @@ exports.signUp = async (req, res) => {
         const id_user = uniqid()
 
         user = await User.create({
-            id: id_user,
+            id_user,
             name: email.split('@')[0],
             email,
-            password: hash
+            password: type === 'google' ? null : hash
         })
 
         const token = jwt.sign({
@@ -56,7 +57,7 @@ exports.login = async (req, res) => {
 
         const { email, password } = req.body;
 
-        const user = await User.findOne({ email, raw: true })
+        const user = await User.findOne({ where: { email }, raw: true })
 
         if (!user) return res.status(500).json({ error: 'User does not exist' })
 
@@ -110,35 +111,36 @@ exports.forgot = async (req, res) => {
 }
 
 exports.verifyEmail = async (req, res) => {
-    const { email, password } = req.body;
+    try {
 
-    let user = await User.findOne({ email, raw: true })
+        const { email } = req.body;
 
-    if (user) return res.status(500).json({
-        error: 'User already exists'
-    });
+        let user = await User.findOne({ where: { email }, raw: true })
 
-    await transporter
-        .sendMail({
-            from: process.env.EMAIL,
-            to: email,
-            subject: `Click the link to create your account.`,
-            html: `<div>
-            <br />
-            <form action="${process.env.BASE_URL}/signup" method="POST">
-            <input type="hidden" value="${email}" name="email">
-            <input type="hidden" value="${users[i]._id}" name="password">
-            <button>Mark as completed</button>
-            </form>
-        </div>`,
-        })
-        .then(async () => {
-            res.json("ok");
-        })
-        .catch(async (err) => {
-            console.log(err);
-            res.json(err);
+        if (user) return res.status(500).json({
+            error: 'User already exists'
         });
+
+        await transporter
+            .sendMail({
+                from: process.env.EMAIL,
+                to: email,
+                subject: `Click the link to create your account.`,
+                html: `<div>
+            <a href="http://mizule/verify">Click here to create your account</a>
+            </div>`,
+            })
+            .then(async () => {
+                res.json("ok");
+            })
+            .catch(async (err) => {
+                console.log(err);
+                res.json(err);
+            });
+    } catch (error) {
+        console.log(error);
+        res.json(error);
+    }
 }
 
 exports.resetPassword = async (req, res) => {
