@@ -51,69 +51,6 @@ exports.signUp = async (req, res) => {
     }
 }
 
-exports.loginWithGoogle = async (req, res) => {
-    try {
-        const { email, name, photo } = req.body;
-
-        let user = await User.findOne({ where: { email }, raw: true })
-
-        if (user) {
-            const token = jwt.sign({
-                id_user: user.id_user,
-                name: user.name,
-                email: user.email,
-                phone: user.phone,
-                followed_zuleSpots: user.followed_zuleSpots,
-                subscription: user.subscription,
-                history: user.history,
-                created_at: user.created_at,
-                updated_at: user.updated_at,
-            }, process.env.SECRET, {
-                expiresIn: 60 * 60 * 24 * 7 * 30
-            });
-
-            return res.json({
-                token,
-                ...user
-            });
-        } else {
-            const id_user = uniqid()
-
-            user = await User.create({
-                id_user,
-                name,
-                email,
-                icon: photo,
-                password: null
-            })
-
-            const token = jwt.sign({
-                id_user: user.id_user,
-                name: user.name,
-                email: user.email,
-                phone: user.phone,
-                icon: user.icon,
-                followed_zuleSpots: user.followed_zuleSpots,
-                subscription: user.subscription,
-                history: user.history,
-                created_at: user.created_at,
-                updated_at: user.updated_at,
-            }, process.env.SECRET, {
-                expiresIn: 1000 * 60 * 60 * 24 * 7 * 30
-            });
-
-            return res.json({
-                token,
-                ...user
-            });
-        }
-
-    } catch (error) {
-        console.log(error);
-        return res.status(500).json({ error });
-    }
-}
-
 exports.login = async (req, res) => {
     try {
 
@@ -151,25 +88,67 @@ exports.login = async (req, res) => {
     }
 }
 
-exports.forgot = async (req, res) => {
+exports.loginWithGoogle = async (req, res) => {
     try {
-        const { email } = req.body
+        const { email, name, photo } = req.body;
 
-        const user = await User.count({ where: { email } })
+        let user = await User.findOne({ where: { email }, raw: true })
 
-        if (!user) return res.status(500).json({ error: 'User does not exist' })
-        await transporter.sendMail({
-            from: process.env.EMAIL,
-            to: email,
-            subject: "Reset your Mizule Account's password",
-            html: `<p><a href='${process.env.BASE_URL}/app/${results[0].id_user}'>Click here</a> to reset your Mizule Account's password</p>`,
-        });
-        res.json('ok')
+        if (user) {
+            const token = jwt.sign({
+                id_user: user.id_user,
+                name: user.name,
+                email: user.email,
+                phone: user.phone,
+                followed_zuleSpots: user.followed_zuleSpots,
+                subscription: user.subscription,
+                history: user.history,
+                created_at: user.created_at,
+                updated_at: user.updated_at,
+            }, process.env.SECRET, {
+                expiresIn: 60 * 60 * 24 * 7 * 30
+            });
+            return res.json({
+                token,
+                ...user
+            });
+        } else {
+            const id_user = uniqid()
+
+            user = await User.create({
+                id_user,
+                name,
+                email,
+                icon: photo,
+                password: null
+            })
+
+            const token = jwt.sign({
+                id_user: user.id_user,
+                name: user.name,
+                email: user.email,
+                phone: user.phone,
+                icon: user.icon,
+                followed_zuleSpots: user.followed_zuleSpots,
+                subscription: user.subscription,
+                history: user.history,
+                created_at: user.created_at,
+                updated_at: user.updated_at,
+            }, process.env.SECRET, {
+                expiresIn: 1000 * 60 * 60 * 24 * 7 * 30
+            });
+
+            return res.json({
+                token,
+                ...user
+            });
+        }
     } catch (error) {
         console.log(error);
         return res.status(500).json({ error });
     }
 }
+
 
 exports.verifyEmail = async (req, res) => {
     try {
@@ -204,19 +183,66 @@ exports.verifyEmail = async (req, res) => {
     }
 }
 
+exports.resetPasswordVerify = async (req, res) => {
+    try {
+        const { email } = req.body
+        console.log("🚀 ~ file: auth.controller.js:178 ~ exports.forgot= ~ email:", email)
+
+        const user = await User.count({ where: { email } })
+
+        if (!user) return res.status(500).json({ error: 'User does not exist' })
+
+        await transporter.sendMail({
+            from: process.env.EMAIL,
+            to: email,
+            subject: "Reset your Mizule Account's password",
+            html: `<a href='http://mizule/reset-password'>Click here to reset your Mizule Account's password</a>`,
+        });
+
+        res.json('ok')
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ error });
+    }
+}
+
+
 exports.resetPassword = async (req, res) => {
     try {
-        const { id_user, password } = req.body
+        const { email, password } = req.body
+
+        const user = await User.count({ where: { email } })
+        if (!user) return res.status(500).json({ error: 'User does not exist' })
 
         const salt = bcrypt.genSaltSync(10);
         const hash = bcrypt.hashSync(password, salt);
 
-        let user = await User.findByPk(id_user)
 
-        if (!user) return res.status(500).json({ error })
-
-        user = await User.update({ password: hash }, { where: { id: id_user } })
+      await User.update({ password: hash }, { where: { email } })
         res.json('ok')
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ error });
+    }
+}
+
+exports.updatePassword = async (req, res) => {
+    try {
+        const { email, password } = req.body
+        let user = await User.findOne({ where: { email }, raw: true })
+        if (!user) return res.status(500).json({
+            error: 'User does not exist.'
+        });
+
+        const salt = bcrypt.genSaltSync(10);
+        const hash = bcrypt.hashSync(password, salt);
+
+        await User.update(
+            { password: hash },
+            { where: { email } }
+        )
+
+        return res.json('ok')
     } catch (error) {
         console.log(error);
         return res.status(500).json({ error });
