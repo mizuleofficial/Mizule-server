@@ -26,13 +26,14 @@ app.use(morgan('dev'))
 //     console.log(`Video uploaded: ${req.file}`)
 // })
 
-app.use('/', authRouter)
-app.use('/user', userRouter)
-app.use('/zules', zulesRouter)
-app.use('/zules', fetchZuleRouter)
+app.use('/api', authRouter)
+app.use('/api/user', userRouter)
+app.use('/api/zules', zulesRouter)
+app.use('/api/zules', fetchZuleRouter)
 
 // app.use(function (err, req, res) {
 //     console.log(err);
+
 //     return res.json(err)
 // });
 
