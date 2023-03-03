@@ -39,7 +39,8 @@ exports.feedZule = async (req, res) => {
         const user = await User.findByPk(user_id)
         const zule = await Zule.findByPk(id_zule.split('-')[0])
         const zuleSpot = await ZuleSpot.findByPk(id_zuleSpot)
-        if (!(user && zule && zuleSpot)) return res.status(500).json({ error: 'Invalid request' })
+        // user &&
+        if (!(zule && zuleSpot)) return res.status(500).json({ error: 'Invalid request' })
 
         const zulePath = path.join(__dirname, '../zules', '/', id_zuleSpot, '/', id_zule)
         res.sendFile(zulePath);
