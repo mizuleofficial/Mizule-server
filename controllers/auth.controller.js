@@ -186,7 +186,6 @@ exports.verifyEmail = async (req, res) => {
 exports.resetPasswordVerify = async (req, res) => {
     try {
         const { email } = req.body
-        console.log("🚀 ~ file: auth.controller.js:178 ~ exports.forgot= ~ email:", email)
 
         const user = await User.count({ where: { email } })
 

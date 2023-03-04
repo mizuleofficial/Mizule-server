@@ -1,5 +1,5 @@
 const path = require('path');
-const { Op } = require('sequelize')
+const { Op, Sequelize } = require('sequelize')
 
 const { Zule, User, ZuleSpot, sequelize } = require('../database/database')
 
@@ -7,9 +7,8 @@ exports.getRandomZules = async (req, res) => {
     try {
         const { offset } = req.query
 
-        const [results, metadata] = await sequelize.query(`SELECT * FROM zules ORDER BY RANDOM() LIMIT 50 OFFSET ${offset}`);
+        const [results, metadata] = await sequelize.findAll({ order: Sequelize.literal('rand()'), limit: 50, offset })
 
-        console.log("🚀 ~ file: fetchZule.controller.js:12 ~ exports.getRandomZules= ~ results:", results)
         res.json(results)
     } catch (error) {
         console.log(error);
