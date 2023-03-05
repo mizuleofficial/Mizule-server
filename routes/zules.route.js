@@ -6,7 +6,7 @@ const { validateUser } = require('../middlewares/middlewares.util')
 const { errorHandler } = require('../utils/errorHandlers.util')
 
 
-router.route('/like').post(validateUser, errorHandler(likePost))
-router.route('/comment').post(validateUser, errorHandler(commentPost))
+router.route('/like').post(errorHandler(likePost))
+router.route('/comment').post(errorHandler(commentPost))
 
 module.exports = router

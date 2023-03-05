@@ -5,7 +5,7 @@ const errorHandler = (fn) => {
 }
 
 class AppError extends Error {
-    constructor(message, status) {
+    constructor(message = 'Something went wrong', status = 500) {
         super();
         this.message = message;
         this.status = status;

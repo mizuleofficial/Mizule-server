@@ -23,7 +23,7 @@ module.exports = (sequelize, DataTypes) => {
         },
         views: {
             type: DataTypes.JSON,
-            defaultValue: { teaser: 0, zule: 0 }
+            defaultValue: { teaser: [], zule: [] }
         },
         CBFC_rating: {
             type: DataTypes.STRING,

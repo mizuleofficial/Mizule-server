@@ -6,46 +6,53 @@ const { AppError } = require('../utils/errorHandlers.util')
 
 exports.historyPost = async (req, res) => {
     const { id_user, id_zule, type } = req.body
+    // 1nomg4cleo9ehbd 635e8cffedd93
+
+    var zule = await Zule.findByPk(id_zule, { raw: true })
+    var user = await User.findByPk(id_user, { raw: true })
+
+    if (!(user && zule)) throw new AppError('Invalid request', 400)
+
+    var history = type === 'teaser' ? user.history.teasers : user.history.zules
+    history = history.filter(h => h !== id_zule)
+    history.unshift(id_zule)
+    
     await User.update(
-        { history },
-        { returning: true, where: { id_user } }
-    )
-    await User.update(
-        { history: sequelize.fn('array_append', sequelize.col('history'), id_user) },
-        { where: { id_user } }
-    );
-    const zule = await Zule.findByPk(id_zule)
-    if (!zule.length) throw new AppError('No zules found', 500)
-    let views = zule[0].views
-    if (type === 'teaser') {
-        views = {
-            ...views, teaser: views.teaser + 1
-        }
-    } else {
-        views = {
-            ...views, zule: views.zule + 1
-        }
+        {
+            history: type === 'teaser' ? { ...user.history, teasers: history } : { ...user.history, zules: history }
+        }, {
+        where: { id_user }
+    })
+
+    var views = type === 'teaser' ? zule.views.teaser : zule.views.zule
+
+    if (!views.includes(id_user)) {
+        views.unshift(id_user)
+        await Zule.update(
+            {
+                views: type === 'teaser' ? { ...zule.views, teaser: views } : { ...zule.views, zule: views }
+            }, {
+            where: { id_zule }
+        })
     }
-    await User.update(
-        { views },
-        { returning: true, where: { id_zule } }
-    )
-    return res.json('ok')
+    return res.json({ history, views })
 }
 
 exports.likePost = async (req, res) => {
-    const { id_user, id_zule, type } = req.body
-    const zule = await Zule.findByPk(id_zule)
+    const { id_user, id_zule } = req.body
+    var zule = await Zule.findByPk(id_zule, { raw: true })
+    var user = await User.findByPk(id_user, { raw: true })
+
+    if (!(user && zule)) throw new AppError('Invalid request', 400)
+
+    if (zule.reviews.likes.includes(id_user)) {
+        zule.reviews = { comments: zule.reviews.comments, likes: [...zule.reviews.likes.filter(like => like != id_user)] }
+    } else {
+        zule.reviews = { comments: zule.reviews.comments, likes: [...zule.reviews.likes, id_user] }
+    }
     Zule.update(
         {
-            reviews: {
-                comments: [...zule.reviews.comments],
-                likes:
-                    type === 'like'
-                        ? [...reviews.likes, id_user]
-                        : reviews.likes.filter((like) => like !== id_user)
-            }
-
+            reviews: zule.reviews
         }, {
         where: { id_zule }
     })
