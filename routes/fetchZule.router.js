@@ -4,9 +4,12 @@ const router = express.Router()
 const { validateUser } = require('../middlewares/middlewares.util')
 const { getRandomZules, getParticularZule, feedZule, similarZules } = require('../controllers/fetchZule.controller')
 
-router.route('/random').get(getRandomZules)
-router.route('/particular/:id_zule').get(getParticularZule)
-router.route('/:id_zuleSpot/:user_id/:id_zule').get(feedZule)
-router.route('/random/similar').get(similarZules)
+const { errorHandler } = require('../utils/errorHandlers.util')
+
+
+router.route('/random').get(errorHandler(getRandomZules))
+router.route('/particular/:id_zule').get(errorHandler(getParticularZule))
+router.route('/:id_zuleSpot/:user_id/:id_zule').get(errorHandler(feedZule))
+router.route('/random/similar').get(errorHandler(similarZules))
 
 module.exports = router
