@@ -1,6 +1,6 @@
 const zuleSeeds = require('./seeds/zule.seed')
 
-const { Zule } = require('../database/database')
+const db = require('../database/database')
 
 db.Zule.sync({ force: true }).then(async () => {
     console.log('ZULE MODEL CREATED')

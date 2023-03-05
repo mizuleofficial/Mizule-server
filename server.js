@@ -31,10 +31,14 @@ app.use('/api/user', userRouter)
 app.use('/api/zules', zulesRouter)
 app.use('/api/zules', fetchZuleRouter)
 
-// app.use(function (err, req, res) {
-//     console.log(err);
+app.use((req, res) => {
+    res.status(404).json('NOT FOUND!')
+})
 
-//     return res.json(err)
-// });
+app.use((err, req, res, next) => {
+    const { status = 500, message = 'Something went wrong' } = err;
+    console.log(err);
+    res.status(status).json(message);
+})
 
 app.listen(process.env.PORT, console.log(`SERVER IS RUNNING ON PORT ${process.env.PORT}`))

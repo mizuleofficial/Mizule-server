@@ -7,13 +7,27 @@ exports.getRandomZules = async (req, res) => {
     try {
         const { offset } = req.query
 
-        const [results, metadata] = await sequelize.query(`SELECT * FROM zules ORDER BY RANDOM() LIMIT 50 OFFSET ${offset}`);
+        const [zulesRaw, metadata1] = await sequelize.query(`SELECT * FROM zules ORDER BY RANDOM() LIMIT 50`);
+        
+        const [zuleSpots, metadata2] = await sequelize.query(`SELECT * FROM zuleSpots WHERE zuleSpots."id_zuleSpot" IN (${[...new Set(zulesRaw.map(z => `'${z.id_zuleSpot}'`))]})`);
+        var zules = []
+        zulesRaw.forEach(zuleRaw => {
+            zuleSpots.forEach(zuleSpot => {
+                if (zuleRaw.id_zuleSpot === zuleSpot.id_zuleSpot) {
+                    zules.push({
+                        ...zuleRaw, zuleSpot: {
+                            ...zuleSpot
+                        }
+                    })
+                }
+            })
+        })
 
-        console.log("🚀 ~ file: fetchZule.controller.js:12 ~ exports.getRandomZules= ~ results:", results)
-        res.json(results)
+        res.json(zules)
+
     } catch (error) {
         console.log(error);
-        res.status(404).json({ error: "Not Found" })
+        res.status(409).json({ error: "Not Found" })
     }
 }
 
