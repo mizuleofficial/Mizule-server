@@ -1,4 +1,4 @@
-const bcrypt = require('bcrypt')
+const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 var uniqid = require('uniqid');
 
@@ -144,7 +144,7 @@ exports.verifyEmail = async (req, res) => {
             to: email,
             subject: `Click the link to create your account.`,
             html: `<div>
-            <a href="http://mizule/verify">Click here to create your account</a>
+            <a href="https://mizule/verify">Click here to create your account</a>
             </div>`,
         })
         .then(async () => {
@@ -162,7 +162,7 @@ exports.resetPasswordVerify = async (req, res) => {
         from: process.env.EMAIL,
         to: email,
         subject: "Reset your Mizule Account's password",
-        html: `<a href='http://mizule/reset-password'>Click here to reset your Mizule Account's password</a>`,
+        html: `<a href='https://mizule/reset-password'>Click here to reset your Mizule Account's password</a>`,
     }).then(() => {
         res.json('ok')
     })
