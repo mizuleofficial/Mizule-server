@@ -1,12 +1,13 @@
-const { Zule } = require('../database/database')
+var uniqid = require('uniqid');
+
+
+const { Zule, ZuleSpot } = require('../database/database')
 const { User } = require('../database/database')
 
 const { AppError } = require('../utils/errorHandlers.util')
 
-
 exports.historyPost = async (req, res) => {
     const { id_user, id_zule, type } = req.body
-    // 1nomg4cleo9ehbd 635e8cffedd93
 
     var zule = await Zule.findByPk(id_zule, { raw: true })
     var user = await User.findByPk(id_user, { raw: true })
@@ -16,7 +17,7 @@ exports.historyPost = async (req, res) => {
     var history = type === 'teaser' ? user.history.teasers : user.history.zules
     history = history.filter(h => h !== id_zule)
     history.unshift(id_zule)
-    
+
     await User.update(
         {
             history: type === 'teaser' ? { ...user.history, teasers: history } : { ...user.history, zules: history }
@@ -38,7 +39,7 @@ exports.historyPost = async (req, res) => {
     return res.json({ history, views })
 }
 
-exports.likePost = async (req, res) => {
+exports.likeZule = async (req, res) => {
     const { id_user, id_zule } = req.body
     var zule = await Zule.findByPk(id_zule, { raw: true })
     var user = await User.findByPk(id_user, { raw: true })
@@ -67,4 +68,40 @@ exports.commentPost = async (req, res) => {
     reviews.comments = allComments
     await Zule.update({ reviews }, { where: { id_zule } })
     return res.json('ok')
+}
+
+exports.createZule = async (req, res) => {
+    const { title,
+        description,
+        zuleSpot: zuleSpotTitle,
+        id_user,
+        tags,
+        genre,
+        CBFC_rating } = req.body
+    let user = await User.findByPk(id_user, { raw: true })
+    let zuleSpot = await ZuleSpot.findOne({ where: { title: zuleSpotTitle }, raw: true })
+
+    if (!user || !zuleSpot) throw new AppError('Invalid request', 409)
+    const id_zule = uniqid()
+    const zule = await Zule.create({
+        id_zule: id_zule,
+        title: title,
+        description: description,
+        tags: tags.split(','),
+        genre: genre.split(','),
+
+        id_zuleSpot: zuleSpot.id_zuleSpot,
+        CBFC_rating: CBFC_rating,
+    })
+
+    const otherZules = zuleSpot.zules
+
+    ZuleSpot.update(
+        {
+            zules: [zule.id_zule, ...otherZules]
+        }, {
+        where: { title: zuleSpotTitle }
+    })
+
+    res.json('ok')
 }

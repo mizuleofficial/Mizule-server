@@ -2,7 +2,7 @@ const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 var uniqid = require('uniqid');
 
-const { User } = require('../database/database')
+const { User, ZuleSpot } = require('../database/database')
 const { transporter } = require('../utils/nodemailer.util')
 const { AppError } = require('../utils/errorHandlers.util')
 
@@ -31,6 +31,7 @@ exports.signUp = async (req, res) => {
         name: user.name,
         email: user.email,
         phone: user.phone,
+        icon: user.icon,
         followed_zuleSpots: user.followed_zuleSpots,
         subscription: user.subscription,
         history: user.history,
@@ -52,6 +53,7 @@ exports.login = async (req, res) => {
     const user = await User.findOne({ where: { email }, raw: true })
 
     if (!user) throw new AppError('User does not exist', 400)
+    const zuleSpot = await ZuleSpot.findOne({ where: { owner: user.zuleSpot }, raw: true })
     if (!bcrypt.compareSync(password, user.password)) throw new AppError('Invalid email or password', 400)
 
     const token = jwt.sign({
@@ -59,6 +61,8 @@ exports.login = async (req, res) => {
         name: user.name,
         email: user.email,
         phone: user.phone,
+        icon: user.icon,
+        zuleSpot,
         followed_zuleSpots: user.followed_zuleSpots,
         subscription: user.subscription,
         history: user.history,
@@ -70,7 +74,7 @@ exports.login = async (req, res) => {
 
     return res.json({
         token,
-        ...user
+        ...user, zuleSpot
     });
 }
 
@@ -79,12 +83,16 @@ exports.loginWithGoogle = async (req, res) => {
 
     let user = await User.findOne({ where: { email }, raw: true })
 
+
     if (user) {
+        const zuleSpot = await ZuleSpot.findOne({ where: { owner: user.zuleSpot }, raw: true })
         const token = jwt.sign({
             id_user: user.id_user,
             name: user.name,
             email: user.email,
             phone: user.phone,
+            icon: user.icon,
+            zuleSpot,
             followed_zuleSpots: user.followed_zuleSpots,
             subscription: user.subscription,
             history: user.history,
@@ -95,7 +103,7 @@ exports.loginWithGoogle = async (req, res) => {
         });
         return res.json({
             token,
-            ...user
+            ...user, zuleSpot
         });
     } else {
         const id_user = uniqid()
@@ -106,27 +114,29 @@ exports.loginWithGoogle = async (req, res) => {
             email,
             icon: photo,
             password: null
+        }).then((resultEntity) => {
+            const user = resultEntity.get({ plain: true })
+            const token = jwt.sign({
+                id_user: user.id_user,
+                name: user.name,
+                email: user.email,
+                phone: user.phone,
+                icon: user.icon,
+                followed_zuleSpots: user.followed_zuleSpots,
+                subscription: user.subscription,
+                history: user.history,
+                created_at: user.created_at,
+                updated_at: user.updated_at,
+            }, process.env.SECRET, {
+                expiresIn: 1000 * 60 * 60 * 24 * 7 * 30
+            });
+
+            return res.json({
+                token,
+                ...user
+            });
         })
 
-        const token = jwt.sign({
-            id_user: user.id_user,
-            name: user.name,
-            email: user.email,
-            phone: user.phone,
-            icon: user.icon,
-            followed_zuleSpots: user.followed_zuleSpots,
-            subscription: user.subscription,
-            history: user.history,
-            created_at: user.created_at,
-            updated_at: user.updated_at,
-        }, process.env.SECRET, {
-            expiresIn: 1000 * 60 * 60 * 24 * 7 * 30
-        });
-
-        return res.json({
-            token,
-            ...user
-        });
     }
 }
 

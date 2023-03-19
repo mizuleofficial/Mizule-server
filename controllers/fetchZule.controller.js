@@ -9,6 +9,7 @@ exports.getRandomZules = async (req, res) => {
     const { offset } = req.query
 
     const [zulesRaw, metadata1] = await sequelize.query(`SELECT * FROM zules ORDER BY RANDOM() LIMIT 50`);
+    if (!zulesRaw.length) return res.json([])
 
     const [zuleSpots, metadata2] = await sequelize.query(`SELECT * FROM zuleSpots WHERE zuleSpots."id_zuleSpot" IN (${[...new Set(zulesRaw.map(z => `'${z.id_zuleSpot}'`))]})`);
     var zules = []
@@ -43,18 +44,20 @@ exports.getParticularZule = async (req, res) => {
 }
 
 exports.feedZule = async (req, res) => {
-    const { id_zule, id_zuleSpot, user_id } = req.params
+    const { zuleTitle, id_zuleSpot, id_user } = req.params
 
-    const user = await User.findByPk(user_id)
-    const zule = await Zule.findByPk(id_zule.split('-')[0])
+    const user = await User.findByPk(id_user)
+    const zule = await Zule.findOne({
+        where: {
+            title: zuleTitle.split('-')[0]
+        }, raw: true
+    })
     const zuleSpot = await ZuleSpot.findByPk(id_zuleSpot)
-    // user &&
-    if (!(zule && zuleSpot)) throw new AppError()
+    if (!(user && zule && zuleSpot)) throw new AppError()
 
-    const zulePath = path.join(__dirname, '../zules', '/', id_zuleSpot, '/', id_zule)
+    const zulePath = path.join(__dirname, '../resources', '/', zuleSpot.title, '/zules', '/', zule.title, '/',zuleTitle)
     res.sendFile(zulePath);
 }
-
 
 exports.similarZules = async (req, res) => {
     let { categories } = req.query

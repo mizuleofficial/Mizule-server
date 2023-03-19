@@ -8,7 +8,8 @@ const db = require('./database/database')
 const authRouter = require('./routes/auth.route')
 const zulesRouter = require('./routes/zules.route')
 const userRouter = require('./routes/user.route')
-const fetchZuleRouter = require('./routes/fetchZule.router')
+const fetchZuleRouter = require('./routes/fetchZule.route')
+const zuleSpotRouter = require('./routes/zuleSpot.route')
 
 const app = express()
 app.use(express.static('zules'))
@@ -16,22 +17,11 @@ app.use(express.json())
 app.use(morgan('dev'))
 app.use(cors())
 
-// db.connect((err) => {
-//     if (err) {
-//         console.log(err);
-//         throw err;
-//     }
-//     console.log('MySql Connected...');
-// })
-
-// app.post('/upload-video', upload.single('my-video'), (req, res) => {
-//     console.log(`Video uploaded: ${req.file}`)
-// })
-
 app.use('/api', authRouter)
 app.use('/api/user', userRouter)
 app.use('/api/zules', zulesRouter)
 app.use('/api/zules', fetchZuleRouter)
+app.use('/api/zulespot', zuleSpotRouter)
 
 app.use((req, res) => {
     res.status(404).json('NOT FOUND!')

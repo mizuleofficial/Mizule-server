@@ -28,17 +28,21 @@ module.exports = (sequelize, DataTypes) => {
             },
             defaultValue: 'https://img.icons8.com/fluency/48/000000/guest-male.png'
         },
+        zuleSpot: {
+            type: DataTypes.STRING,
+            defaultValue: null
+        },
         followed_zuleSpots: {
+            type: DataTypes.ARRAY(DataTypes.STRING),
+            defaultValue: []
+        },
+        watchLater: {
             type: DataTypes.ARRAY(DataTypes.STRING),
             defaultValue: []
         },
         subscription: {
             type: DataTypes.STRING,
             defaultValue: 'free'
-        },
-        role: {
-            type: DataTypes.STRING,
-            defaultValue: 'standard'
         },
         history: {
             type: DataTypes.JSON,

@@ -16,10 +16,10 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.STRING,
         },
         tags: {
-            type: DataTypes.ARRAY(DataTypes.STRING), defaultValue: []
+            type: DataTypes.ARRAY(DataTypes.STRING), allowNull: false
         },
-        category: {
-            type: DataTypes.ARRAY(DataTypes.STRING), defaultValue: []
+        genre: {
+            type: DataTypes.ARRAY(DataTypes.STRING), allowNull: false
         },
         views: {
             type: DataTypes.JSON,
@@ -27,10 +27,7 @@ module.exports = (sequelize, DataTypes) => {
         },
         CBFC_rating: {
             type: DataTypes.STRING,
-            defaultValue: 'U/A',
-            validate: {
-                max: 5, min: 1
-            }
+            allowNull: false
         },
         reviews: {
             type: DataTypes.JSON,
