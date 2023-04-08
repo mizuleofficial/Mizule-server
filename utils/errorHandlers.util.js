@@ -1,6 +1,9 @@
 const errorHandler = (fn) => {
     return (req, res, next) => {
-        return fn(req, res, next).catch(e => next(e))
+        return fn(req, res, next).catch(e => {
+            console.log(e);
+            next(e)
+        })
     }
 }
 

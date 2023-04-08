@@ -16,7 +16,7 @@ exports.createZuleSpot = multer({
 
 exports.zuleUpload = multer({
     storage: multer.diskStorage({
-        destination: function (req,file, cb) {
+        destination: function (req, file, cb) {
             path = `resources/${req.body.zuleSpot}/zules/${req.body.title}`
             fs.mkdirSync(path, { recursive: true })
             cb(null, path)

@@ -7,7 +7,7 @@ const { getRandomZules, getParticularZule, feedZule, similarZules } = require('.
 const { errorHandler } = require('../utils/errorHandlers.util')
 
 
-router.route('/random').get(validateUser, errorHandler(getRandomZules))
+router.route('/random').get( errorHandler(getRandomZules))
 router.route('/particular/:id_zule').get(validateUser, errorHandler(getParticularZule))
 router.route('/:id_zuleSpot/:id_user/:zuleTitle').get(errorHandler(feedZule))
 router.route('/random/similar').get(validateUser, errorHandler(similarZules))

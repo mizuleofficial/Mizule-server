@@ -36,6 +36,10 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.ARRAY(DataTypes.STRING),
             defaultValue: []
         },
+        // liked: {
+        //     type: DataTypes.JSON,
+        //     defaultValue: { teasers: [], zules: [] }
+        // },
         watchLater: {
             type: DataTypes.ARRAY(DataTypes.STRING),
             defaultValue: []

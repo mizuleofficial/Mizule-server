@@ -53,9 +53,10 @@ exports.feedZule = async (req, res) => {
         }, raw: true
     })
     const zuleSpot = await ZuleSpot.findByPk(id_zuleSpot)
+    console.log("🚀 ~ file: fetchZule.controller.js:56 ~ exports.feedZule= ~ zuleSpot:", req.params)
     if (!(user && zule && zuleSpot)) throw new AppError()
 
-    const zulePath = path.join(__dirname, '../resources', '/', zuleSpot.title, '/zules', '/', zule.title, '/',zuleTitle)
+    const zulePath = path.join(__dirname, '../resources', '/', zuleSpot.title, '/zules', '/', zule.title, '/', zuleTitle)
     res.sendFile(zulePath);
 }
 

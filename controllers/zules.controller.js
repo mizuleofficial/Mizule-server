@@ -1,3 +1,4 @@
+const { Op } = require('sequelize');
 var uniqid = require('uniqid');
 
 
@@ -39,8 +40,21 @@ exports.historyPost = async (req, res) => {
     return res.json({ history, views })
 }
 
+exports.getLiked = async (req, res) => {
+    const { id_user } = req.params
+    var user = await User.findByPk(id_user, { raw: true })
+    if (!user) throw new AppError('Invalid request', 400)
+
+    let liked = await Zule.findAll({ raw: true })
+
+    res.json(liked)
+
+}
+
 exports.likeZule = async (req, res) => {
-    const { id_user, id_zule } = req.body
+    const { id_zule } = req.body
+    console.log("🚀 ~ file: zules.controller.js:57 ~ exports.likeZule= ~ id_zule:", id_zule)
+    const { id_user, } = req.params
     var zule = await Zule.findByPk(id_zule, { raw: true })
     var user = await User.findByPk(id_user, { raw: true })
 
